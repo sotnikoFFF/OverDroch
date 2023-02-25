@@ -1,10 +1,13 @@
 package com.meew.overdroch
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -19,187 +22,180 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@Stable
-class SearchState(
-    query: TextFieldValue,
-    focused: Boolean,
-    searching: Boolean,
-    suggestions: List<String>,
-    searchResults: List<String>
+@Composable
+fun ExpandableSearchView(
+    searchDisplay: String,
+    onSearchDisplayChanged: (String) -> Unit,
+    onSearchDisplayClosed: () -> Unit,
+    modifier: Modifier = Modifier,
+    expandedInitially: Boolean = false,
+    tint: Color = MaterialTheme.colors.onPrimary
 ) {
-    var query by mutableStateOf(query)
-    var focused by mutableStateOf(focused)
-    var searching by mutableStateOf(searching)
-    var suggestions by mutableStateOf(suggestions)
-    var searchResults by mutableStateOf(searchResults)
+    val (expanded, onExpandedChanged) = remember {
+        mutableStateOf(expandedInitially)
+    }
 
-    val searchDisplay: SearchDisplay
-        get() = when {
-            !focused && query.text.isEmpty() -> SearchDisplay.InitialResults
-            focused && query.text.isEmpty() -> SearchDisplay.Suggestions
-            searchResults.isEmpty() -> SearchDisplay.NoResults
-            else -> SearchDisplay.Results
+
+    Crossfade(targetState = expanded) { isSearchFieldVisible ->
+        when (isSearchFieldVisible) {
+            true -> ExpandedSearchView(
+                searchDisplay = searchDisplay,
+                onSearchDisplayChanged = onSearchDisplayChanged,
+                onSearchDisplayClosed = onSearchDisplayClosed,
+                onExpandedChanged = onExpandedChanged,
+                modifier = modifier,
+                tint = tint
+            )
+
+            false -> CollapsedSearchView(
+                onExpandedChanged = onExpandedChanged,
+                modifier = modifier,
+                tint = tint
+            )
         }
-
-    override fun toString(): String {
-        return "🚀 State query: $query, focused: $focused, searching: $searching " + "suggestions: ${suggestions.size}, " + "searchResults: ${searchResults.size}, " + " searchDisplay: $searchDisplay"
-
-    }
-}
-@Composable
-fun rememberSearchState(
-    query: TextFieldValue = TextFieldValue(""),
-    focused: Boolean = false,
-    searching: Boolean = false,
-    suggestions: List<String> = emptyList(),
-    searchResults: List<String> = emptyList()
-): SearchState {
-    return remember {
-        SearchState(
-            query = query,
-            focused = focused,
-            searching = searching,
-            suggestions = suggestions,
-            searchResults = searchResults
-        )
     }
 }
 
 @Composable
-private fun SearchHint(modifier: Modifier = Modifier) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxSize()
-            .then(modifier)
-
-    ) {
-        Text(
-            color = Color(0xff757575),
-            text = "Search a Tag or Description",
-        )
-    }
+fun SearchIcon(iconTint: Color) {
+    Icon(
+        painter = painterResource(id = R.drawable.search_icon),
+        contentDescription = "search icon",
+        tint = iconTint
+    )
 }
+
 @Composable
-fun SearchTextField(
-    query: TextFieldValue,
-    onQueryChange: (TextFieldValue) -> Unit,
-    onSearchFocusChange: (Boolean) -> Unit,
-    onClearQuery: () -> Unit,
-    searching: Boolean,
-    focused: Boolean,
-    modifier: Modifier = Modifier
+fun CollapsedSearchView(
+    onExpandedChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.colors.onPrimary,
 ) {
 
-    val focusRequester = remember { FocusRequester() }
-
-    Surface(
+    Row(
         modifier = modifier
-            .then(
-                Modifier
-                    .height(56.dp)
-                    .padding(
-                        top = 8.dp,
-                        bottom = 8.dp,
-                        start = if (!focused) 16.dp else 0.dp,
-                        end = 16.dp
-                    )
-            ),
-        color = Color(0xffF5F5F5),
-        shape = RoundedCornerShape(percent = 50),
+            .fillMaxWidth()
+            .padding(0.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-            Box(
-                contentAlignment = Alignment.CenterStart,
-                modifier = modifier
-            ) {
-
-                if (query.text.isEmpty()) {
-                    SearchHint(modifier.padding(start = 24.dp, end = 8.dp))
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    BasicTextField(
-                        value = query,
-                        onValueChange = onQueryChange,
+        IconButton(onClick = { onExpandedChanged(true) }) {
+            Row(modifier = Modifier.padding(15.dp, 20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Box(Modifier,contentAlignment = Alignment.CenterStart){
+                    SearchIcon(iconTint = tint)
+                    Text(
+                        text = "Search..",
+                        style = MaterialTheme.typography.subtitle1.copy(Color.Gray),
                         modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(1f)
-                            .onFocusChanged {
-                                onSearchFocusChange(it.isFocused)
-                            }
-                            .focusRequester(focusRequester)
-                            .padding(top = 9.dp, bottom = 8.dp, start = 24.dp, end = 8.dp),
-                        singleLine = true
+                            .padding(start = 16.dp)
                     )
+                        }
 
-                    when {
-                        searching -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .padding(horizontal = 6.dp)
-                                    .size(36.dp)
-                            )
-                        }
-                        query.text.isNotEmpty() -> {
-                            IconButton(onClick = onClearQuery) {
-                                Icon(imageVector = Icons.Filled.Close, contentDescription = null)
-                            }
-                        }
-                    }
-                }
             }
         }
 
+
     }
 }
-@ExperimentalAnimationApi
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun SearchBar(
-    query: TextFieldValue,
-    onQueryChange: (TextFieldValue) -> Unit,
-    onSearchFocusChange: (Boolean) -> Unit,
-    onClearQuery: () -> Unit,
-    onBack: ()-> Unit,
-    searching: Boolean,
-    focused: Boolean,
-    modifier: Modifier = Modifier
-) {
 
+@Composable
+fun ExpandedSearchView(
+    searchDisplay: String,
+    onSearchDisplayChanged: (String) -> Unit,
+    onSearchDisplayClosed: () -> Unit,
+    onExpandedChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.colors.onPrimary,
+) {
     val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val textFieldFocusRequester = remember { FocusRequester() }
+
+    SideEffect {
+        textFieldFocusRequester.requestFocus()
+    }
+
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(searchDisplay, TextRange(searchDisplay.length)))
+    }
 
     Row(
         modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-        AnimatedVisibility(visible = focused) {
-            // Back button
-            IconButton(
-                modifier = Modifier.padding(start =2.dp),
-                onClick = {
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                    onBack()
-                }) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-            }
+        IconButton(onClick = {
+            onExpandedChanged(false)
+            onSearchDisplayClosed()
+        }) {
+            Icon(
+                contentDescription = "back icon",
+                painter = painterResource(id = R.drawable.back_icon),
+                tint = tint
+            )
         }
-
-        SearchTextField(
-            query,
-            onQueryChange,
-            onSearchFocusChange,
-            onClearQuery,
-            searching,
-            focused,
-            modifier.weight(1f)
+        TextField(
+            value = textFieldValue,
+            onValueChange = {
+                textFieldValue = it
+                onSearchDisplayChanged(it.text)
+            },
+            trailingIcon = {
+                SearchIcon(iconTint = tint)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(textFieldFocusRequester),
+            label = {
+                Text(text = "Search", color = tint)
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
+            )
         )
     }
+}
+
+@Preview
+@Composable
+fun CollapsedSearchViewPreview() {
+
+        Surface(
+            color = MaterialTheme.colors.primary
+        ) {
+            ExpandableSearchView(
+                searchDisplay = "",
+                onSearchDisplayChanged = {},
+                onSearchDisplayClosed = {}
+            )
+        }
+
+}
+
+@Preview
+@Composable
+fun ExpandedSearchViewPreview() {
+
+        Surface(
+            color = MaterialTheme.colors.primary
+        ) {
+            ExpandableSearchView(
+                searchDisplay = "",
+                onSearchDisplayChanged = {},
+                expandedInitially = true,
+                onSearchDisplayClosed = {}
+            )
+        }
+
 }

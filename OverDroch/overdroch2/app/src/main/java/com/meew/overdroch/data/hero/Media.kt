@@ -1,4 +1,4 @@
-package com.meew.overdroch.data
+package com.meew.overdroch.data.hero
 
 enum class TYPE {
     video

@@ -3,16 +3,20 @@ package com.meew.overdroch.utils
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.meew.overdroch.Endpoints
+import com.meew.overdroch.data.OverFastService
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLConnection
+import javax.net.ssl.HttpsURLConnection
 
 object RestUtils {
+
     @Throws(IOException::class)
-    fun getResponseBody(connection: HttpURLConnection): String {
+    fun getResponseBody(connection: HttpsURLConnection): String {
         val responseBody = connection.inputStream
         val response = StringBuilder()
         BufferedReader(InputStreamReader(responseBody, "UTF-8")).use { reader ->
@@ -22,6 +26,26 @@ object RestUtils {
             }
         }
         return response.toString()
+    }
+
+    @Throws(IOException::class)
+    fun getResponseBody(url: URL): String {
+        val  connection = url.openConnection() as HttpsURLConnection
+        return getResponseBody(connection)
+    }
+
+    @Throws(IOException::class)
+    fun getResponseBody(endpoint: Endpoints): String {
+        val url =    URL(endpoint.toString())
+        val  connection = url.openConnection() as HttpsURLConnection
+        return getResponseBody(connection)
+    }
+
+    @Throws(IOException::class)
+    fun getResponseBody(endpoint: String): String {
+        val url =    URL(endpoint)
+        val  connection = url.openConnection() as HttpsURLConnection
+        return getResponseBody(connection)
     }
 
     @Throws(IOException::class)

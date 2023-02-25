@@ -5,56 +5,73 @@ import android.os.StrictMode.ThreadPolicy
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.meew.overdroch.Endpoints
+import com.meew.overdroch.data.hero.Hero
+import com.meew.overdroch.data.hero.HeroKey
+import com.meew.overdroch.data.maps.GameMap
+import com.meew.overdroch.utils.HttpsTrustManager
 import com.meew.overdroch.utils.RestUtils
-import java.io.Console
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
 import java.net.URL
-
 import javax.net.ssl.HttpsURLConnection
 
-class OverFastService : OverFastDAO {
-    var overFastEndpoint: String ="http://146.122.150.115:27015/"
-    var connection: HttpURLConnection? = null;
-    var memHeroes: List<Hero>? = null
-    var gson = Gson()
+
+open class OverFastService{
 
     init {
         val policy = ThreadPolicy.Builder().permitAll().build()
+        HttpsTrustManager.allowAllSSL()
         StrictMode.setThreadPolicy(policy)
+        getAllHeroes();
+        getAllMaps();
     }
 
-    override fun getAllHeroes(): List<Hero> {
-        val url: URL
-        url = try {
-            URL(overFastEndpoint + "heroes")
-        } catch (e: MalformedURLException) {
-            throw RuntimeException(e)
-        }
-        var response:String=""
-        try {
-            if (memHeroes == null) {
-                connection = url.openConnection() as HttpURLConnection
-                response= RestUtils.getResponseBody(connection!!)
-                val itemType = object : TypeToken<List<Hero>>() {}.type
-                memHeroes = gson.fromJson(response,itemType)
+    fun getService() : service = service;
+
+    companion object service : OverFastDAO {
+        override var heroes: MutableList<Hero>? = mutableListOf();
+        var gson = Gson()
+        override var maps:MutableList<GameMap> = mutableListOf();
+
+        override fun getAllHeroes() {
+            if(heroes?.isNotEmpty() == true){
+                return;
             }
-        } catch (e: IOException) {
-            Log.println(Log.ERROR,null,response)
-            throw RuntimeException(e)
-        }
-        return memHeroes!!
+            var response:String=""
+            var heroesList :List<Hero> ;
+            try {
+                response= RestUtils.getResponseBody(Endpoints.HEROES.value)
+                val itemType = object : TypeToken<List<Hero>>() {}.type
+                heroesList = gson.fromJson(response,itemType)
+
+            } catch (e: IOException) {
+                Log.println(Log.ERROR,null,response)
+                throw RuntimeException(e)
+            }
+                heroesList!!.forEachIndexed { i, hero -> if(hero.key!=null) heroes?.add(getHeroData(hero.key)) }
     }
 
-    override fun getHeroData(heroKey: HeroKey): Hero {
-        val url: URL
-        return try {
-            url = URL("$overFastEndpoint/heroes/$heroKey")
-            connection = url.openConnection() as HttpsURLConnection
-            gson.fromJson(connection!!.content as String, Hero::class.java)
+    override fun getHeroData(heroKey: String): Hero {
+        try {
+            val response = gson.fromJson(RestUtils.getResponseBody(Endpoints.HERO.value+"${heroKey}"), Hero::class.java)
+            Log.println(Log.INFO, null, response.toString())
+            return response as Hero
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
     }
+
+    override fun getAllMaps() {
+        try {
+            val itemType = object : TypeToken<List<GameMap>>() {}.type
+            maps = gson.fromJson<MutableList<GameMap>?>(RestUtils.getResponseBody(Endpoints.MAPS.value),itemType).toMutableList()
+            Log.println(Log.INFO, null, maps.toString())
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
+    }
+
+
+    }
+
 }

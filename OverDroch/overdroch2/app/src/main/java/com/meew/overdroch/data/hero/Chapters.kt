@@ -1,4 +1,4 @@
-package com.meew.overdroch.data
+package com.meew.overdroch.data.hero
 
 data class Chapters (
     var title: String? = null,
