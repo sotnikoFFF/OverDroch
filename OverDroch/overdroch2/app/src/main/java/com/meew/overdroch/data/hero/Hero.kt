@@ -8,16 +8,4 @@ data class Hero(
         var location: String = "",
         var abilities: List<Ability>?,
         var story: Story? = null
-        ) {
-//        constructor(
-//        key: HeroKey,
-//        name: String,
-//        portraitUrl: String,
-//        role: Role
-//        ) : this(
-//        key = key,
-//        name = name,
-//        portrait = downloadImage(portraitUrl),
-//        role = role
-//        )
-        }
+        )

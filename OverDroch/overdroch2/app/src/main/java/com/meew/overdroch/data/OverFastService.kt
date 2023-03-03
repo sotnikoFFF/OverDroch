@@ -18,6 +18,7 @@ import javax.net.ssl.HttpsURLConnection
 
 open class OverFastService{
 
+    val heroPickerService:HeroPickerService = HeroPickerService()
     init {
         val policy = ThreadPolicy.Builder().permitAll().build()
         HttpsTrustManager.allowAllSSL()
@@ -25,7 +26,6 @@ open class OverFastService{
         getAllHeroes();
         getAllMaps();
     }
-
     fun getService() : service = service;
 
     companion object service : OverFastDAO {
