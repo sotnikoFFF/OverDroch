@@ -5,16 +5,16 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 
 public class FandomParser extends MainParser {
-    
+
+
     public FandomParser(String webDriverPath) {
         System.setProperty("webdriver.chrome.driver", webDriverPath);
-        driver = new ChromeDriver();
-        wikiParser = new OverwatchWikiParser(driver);
-        heroParser = new OverwatchHeroParser(driver);
+
+        wikiParser = new OverwatchWikiParser();
+        heroParser = new OverwatchHeroParser();
     }
     public FandomParser() {
-        driver = new ChromeDriver();
-        wikiParser = new OverwatchWikiParser(driver);
+        wikiParser = new OverwatchWikiParser();
 
     }
 

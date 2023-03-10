@@ -2,6 +2,7 @@ package com.meew.overparser.parser;
 
 import com.meew.overparser.data.Hero;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.util.List;
 
@@ -10,8 +11,8 @@ public class OverwatchBlizzardWikiParser implements WikiParser {
 
     private WebDriver driver;
 
-    public OverwatchBlizzardWikiParser(WebDriver driver){
-        this.driver = driver;
+    public OverwatchBlizzardWikiParser(){
+        this.driver = new ChromeDriver();
     }
 
 

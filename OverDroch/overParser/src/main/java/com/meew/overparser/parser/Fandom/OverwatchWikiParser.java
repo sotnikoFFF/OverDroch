@@ -4,6 +4,7 @@ import com.meew.overparser.parser.WikiParser;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.util.List;
 
@@ -13,8 +14,8 @@ public class OverwatchWikiParser implements WikiParser {
 
     private WebDriver driver;
 
-    public OverwatchWikiParser(WebDriver driver){
-        this.driver = driver;
+    public OverwatchWikiParser(){
+        this.driver = new ChromeDriver();
     }
 
     private boolean isOnPage(){

@@ -14,8 +14,6 @@ public abstract class MainParser {
     public WikiParser wikiParser;
 
     public HeroParser heroParser;
-
-    public static WebDriver driver;
     private RestUtils restUtils;
     MainParser parser;
     private Mode mode;
@@ -31,10 +29,10 @@ public abstract class MainParser {
     }
 
 
-    @Scheduled(fixedDelay = 1000, initialDelay = 1000)
-    public void scheduleFixedRateWithInitialDelayTask() {
-        parser.parse();
-    }
+//    @Scheduled(fixedDelay = 1000, initialDelay = 1000)
+//    public void scheduleFixedRateWithInitialDelayTask() {
+//        parser.parse();
+//    }
 
     public void parse(){
 
