@@ -16,6 +16,7 @@ public class OverwatchWikiParser implements WikiParser {
 
     public OverwatchWikiParser(){
         this.driver = new ChromeDriver();
+        driver.get(url);
     }
 
     private boolean isOnPage(){
