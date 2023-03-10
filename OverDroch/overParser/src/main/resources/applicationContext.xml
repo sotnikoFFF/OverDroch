@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+       default-autowire="byName">
+
+
+
+    <util:properties id="loadedProperties" location="application.properties" />
+    <context:property-placeholder properties-ref="loadedProperties"/>
+
+
+    <bean id="info" class="com.meew.overparser.data.Info"
+        p:about="${server.about}"
+        p:date=" "
+        p:version="1"/>
+
+    <bean class="com.meew.overparser.data.ConnectionInfo" id="connectionInfo"
+       p:endpoint="${site.endpoint}"/>
+
+
+<!--    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate"/>-->
+
+    <bean id="parser" class="com.meew.overparser.parser.MainParser" name="mainParser" scope="singleton"
+        p:restUtils-ref="restUtils"
+        p:mode="${parser.site}"
+        p:webDriverPath="${wedriver}"
+        init-method="init"
+          abstract="true"/>
+
+    <bean class="com.meew.overparser.utils.RestUtils" id="restUtils"
+      p:connectionInfo-ref="connectionInfo"    />
+<!--      p:restTemplate-ref="restTemplate"-->
+
+
+<!--    <bean class="com.meew.overparser.data.parser.Holder" id="dataHolder"-->
+<!--          p:mode="${parser.site}"-->
+<!--    />-->
+
+    <bean class="com.meew.overparser.parser.InfoProviderImpl">
+        <constructor-arg name="mode" value="${parser.site}"/>
+        <constructor-arg name="properties" ref="loadedProperties"/>
+    </bean>
+
+
+
+</beans>
