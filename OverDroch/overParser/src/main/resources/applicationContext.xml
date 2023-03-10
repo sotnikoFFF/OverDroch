@@ -28,7 +28,7 @@
         p:mode="${parser.site}"
         p:webDriverPath="${wedriver}"
         init-method="init"
-          abstract="true"/>
+          abstract="true" destroy-method="close"/>
 
     <bean class="com.meew.overparser.utils.RestUtils" id="restUtils"
       p:connectionInfo-ref="connectionInfo"    />

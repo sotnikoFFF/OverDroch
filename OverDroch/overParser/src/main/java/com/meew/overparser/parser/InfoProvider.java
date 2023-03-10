@@ -1,13 +1,14 @@
 package com.meew.overparser.parser;
 
-import org.openqa.selenium.WebElement;
+import com.meew.overparser.data.InfoType;
 
-import java.util.List;
 public interface InfoProvider {
 
 
-    public String getInfo();
+    public Object getAllContent();
+    public Object getAllContent(InfoType type);
 
     String getLinks();
 
+    Object getAllContent(InfoType type, String name);
 }

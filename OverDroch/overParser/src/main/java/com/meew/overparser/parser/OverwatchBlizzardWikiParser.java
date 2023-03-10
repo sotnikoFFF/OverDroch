@@ -50,4 +50,5 @@ public class OverwatchBlizzardWikiParser implements WikiParser {
     public void parse() {
 
     }
+
 }

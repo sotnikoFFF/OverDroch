@@ -1,15 +1,18 @@
 package com.meew.overparser.root.resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.meew.overparser.data.Hero;
 import com.meew.overparser.data.Info;
-import com.meew.overparser.data.parser.Holder;
+import com.meew.overparser.data.InfoType;
 import com.meew.overparser.parser.InfoProvider;
-import com.meew.overparser.parser.MainParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Properties;
 
@@ -34,9 +37,26 @@ public class MainApplicationRootResource {
 
 
     @GetMapping("/wiki/information")
-    public String wikiInfo(){
-        return infoProvider.getInfo();
+    public Object wikiInfo(){
+        return infoProvider.getAllContent();
     }
+
+    @GetMapping("/{type}")
+    public Object heroes(@PathVariable String type) throws JsonProcessingException {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(infoProvider.getAllContent(InfoType.valueOf(type)));
+        return json;
+    }
+
+    @GetMapping("/{type}/{name}")
+    public String hero(@PathVariable String type, @PathVariable String name) throws JsonProcessingException {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(infoProvider.getAllContent(InfoType.valueOf(type), name));
+        return json ;
+    }
+
+
+
 
     @GetMapping("/wiki/information/links")
     public String wikiLinks(){
